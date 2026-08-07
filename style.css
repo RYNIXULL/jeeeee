@@ -1214,3 +1214,8 @@ body.no-scroll {
   }
 }
 
+
+body.video-active #starfield {
+  display: none !important;
+}
+

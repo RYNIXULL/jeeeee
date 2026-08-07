@@ -138,8 +138,10 @@ const Slider = (() => {
 
     // Slide 2: autoplay video
     if (index === 1) {
+      document.body.classList.add('video-active');
       triggerVideoPlay();
     } else {
+      document.body.classList.remove('video-active');
       pauseVideo();
     }
 
