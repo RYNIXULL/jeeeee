@@ -1,10 +1,11 @@
-module.exports = async (req, res) => {
+const https = require('https');
+
+module.exports = (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // Handle OPTIONS request for CORS preflight
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -15,27 +16,32 @@ module.exports = async (req, res) => {
     return;
   }
 
-  try {
-    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.authorization || ''
-      },
-      body: JSON.stringify(req.body)
-    });
+  // Convert the parsed JSON body back to string if Vercel already parsed it
+  const requestBody = typeof req.body === 'object' ? JSON.stringify(req.body) : req.body;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('NVIDIA API Error:', response.status, errorText);
-      res.status(response.status).json({ error: `NVIDIA API Error: ${response.status}`, details: errorText });
-      return;
+  const options = {
+    hostname: 'integrate.api.nvidia.com',
+    port: 443,
+    path: '/v1/chat/completions',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': req.headers.authorization || ''
     }
+  };
 
-    const data = await response.json();
-    res.status(200).json(data);
-  } catch (error) {
-    console.error('Internal Server Error:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
-  }
+  const proxyReq = https.request(options, (proxyRes) => {
+    // Forward the status code and headers
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    // Pipe the SSE stream directly to the client
+    proxyRes.pipe(res);
+  });
+
+  proxyReq.on('error', (e) => {
+    console.error('Proxy Error:', e);
+    res.status(500).json({ error: 'Proxy Error', message: e.message });
+  });
+
+  proxyReq.write(requestBody);
+  proxyReq.end();
 };
