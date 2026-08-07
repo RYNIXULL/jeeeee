@@ -131,6 +131,7 @@ const Slider = (() => {
 
     const slides = document.querySelectorAll('.slide');
     slides.forEach(s => {
+      s.style.display = 'flex'; // Restore display for all slides to allow transition
       s.style.visibility = 'visible';
     });
 
@@ -206,6 +207,14 @@ const Slider = (() => {
     setTimeout(() => {
       isAnimating = false;
       container.classList.remove('animating');
+      
+      // PERFORMANCE BOOST: If video is playing (slide 2), completely hide other slides
+      // to prevent the browser from compositing hidden animations/filters.
+      if (index === 1) {
+        slides.forEach((s, i) => {
+          if (i !== 1) s.style.display = 'none';
+        });
+      }
     }, duration);
   }
 
