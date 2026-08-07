@@ -344,10 +344,21 @@ const videoEl = document.getElementById('main-video');
 
 function triggerVideoPlay() {
   if (!videoEl) return;
+
+  // ── Freeze everything to free GPU for video ──
+  const starfield = document.getElementById('starfield');
+  if (starfield) starfield.style.display = 'none';
+  
+  // Freeze slider transforms so GPU doesn't composite a 400vw canvas
+  const slidesContainer = document.getElementById('slides-container');
+  if (slidesContainer) {
+    slidesContainer.style.willChange = 'auto';
+    slidesContainer.style.transform = 'none';
+  }
+  
   const play = videoEl.play();
   if (play !== undefined) {
     play.catch(() => {
-      // If it still fails, user can use the native controls to play
       Toast.show('Ketuk video untuk memutar', 'info', 4000);
     });
   }
@@ -356,6 +367,17 @@ function triggerVideoPlay() {
 function pauseVideo() {
   if (!videoEl) return;
   videoEl.pause();
+
+  // ── Restore everything when video exits ──
+  const starfield = document.getElementById('starfield');
+  if (starfield) starfield.style.display = '';
+  
+  const slidesContainer = document.getElementById('slides-container');
+  if (slidesContainer) {
+    slidesContainer.style.willChange = 'transform';
+    // Re-apply correct slide position (slide-2 = index 1 = -25%)
+    slidesContainer.style.transform = 'translateX(-25%)';
+  }
 }
 
 // ─────────────────────────────────────────────
