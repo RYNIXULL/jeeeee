@@ -200,38 +200,67 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 16px 36px;
+  padding: 18px 42px;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
   color: rgba(255, 255, 255, 0.95);
   
-  /* User-requested Lightweight Glassmorphism */
-  background: rgba(255, 255, 255, 0.15); /* bg-white/15 (40 is too bright for dark theme, 15 fits perfectly) */
-  backdrop-filter: blur(12px); /* backdrop-blur-md */
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4); /* border-white/40 */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-sm / shadow-md */
+  /* Liquid Base */
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(18px) saturate(200%);
+  -webkit-backdrop-filter: blur(18px) saturate(200%);
+  border: none;
   
-  /* Static rounded shape (removed heavy liquidMorphBtn for performance) */
-  border-radius: 40px;
+  /* Morphing organic shape */
+  border-radius: 50px 40px 60px 45px / 45px 50px 40px 60px;
+  animation: liquidMorphBtn 5s ease-in-out infinite alternate;
   
   cursor: pointer;
   outline: none;
   overflow: hidden;
-  transition: transform 300ms ease, background 300ms ease, box-shadow 300ms ease;
+  transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 400ms ease;
+  
+  /* Deep Refraction & Surface Tension */
+  box-shadow:
+    inset 6px 6px 14px rgba(255, 255, 255, 0.45), /* Specular reflection top-left */
+    inset -6px -6px 16px rgba(0, 0, 0, 0.4),      /* Deep refraction bottom-right */
+    0 12px 30px rgba(0, 0, 0, 0.5),               /* Shadow cast by droplet */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);     /* Crisp water surface line */
+}
+
+@keyframes liquidMorphBtn {
+  0% { border-radius: 50px 40px 60px 45px / 45px 50px 40px 60px; }
+  100% { border-radius: 40px 60px 45px 50px / 60px 40px 50px 45px; }
+}
+
+/* Intense Specular Glare (Light Ping) */
+.glass-btn::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 15%;
+  width: 30%;
+  height: 25%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 60%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(2px);
+  transform: rotate(-25deg);
 }
 
 .glass-btn:hover {
-  transform: translateY(-3px) scale(1.02);
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow:
+    inset 8px 8px 16px rgba(255, 255, 255, 0.6),
+    inset -8px -8px 20px rgba(0, 0, 0, 0.5),
+    0 16px 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 .glass-btn:active {
-  transform: scale(0.96) translateY(2px);
-  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.98);
 }
 
 /* Ripple effect */
@@ -322,7 +351,6 @@ body.video-active #video-nav-overlay {
     width: 48px;
     height: 48px;
     padding: 0;
-    /* Keeps the lightweight glassmorphism inherited from .glass-btn */
   }
   #video-nav-overlay #btn-prev-1 { left: 20px; }
   #video-nav-overlay #btn-next   { right: 20px; }
@@ -1258,7 +1286,16 @@ body.no-scroll {
 }
 
 @media (max-width: 768px) {
-  /* Simplify envelope drop-shadows on mobile */
+  /* Kill backdrop-filter, morphing animations, and heavy box shadows on non-button glass elements */
+  .glass-panel, .glass-card, #bot-chat-panel, .nav-dots, .poem-card, .toast, .chat-panel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(15, 20, 30, 0.85) !important;
+    animation: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important;
+  }
+  
+  /* 9. Simplify envelope drop-shadows on mobile */
   .envelope-scene {
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)) !important;
   }
