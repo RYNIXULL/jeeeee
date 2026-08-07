@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="A cinematic, romantic night sky experience">
   <title>jee</title>
-  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 
@@ -29,22 +29,24 @@
     Peramban Anda tidak mendukung video HTML5.
   </video>
 
-  <!-- Navigation button: back to slide 1 -->
-  <button id="btn-prev-1" class="glass-btn btn-back" type="button" aria-label="Kembali" title="Kembali">
-    <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="19" y1="12" x2="5" y2="12"/>
-      <polyline points="12 19 5 12 12 5"/>
-    </svg>
-  </button>
+  <div class="video-overlay-ui" style="position: absolute; inset: 0; z-index: 50; pointer-events: none;">
+    <!-- Navigation button: back to slide 1 -->
+    <button id="btn-prev-1" class="glass-btn btn-back" type="button" aria-label="Kembali" title="Kembali" style="pointer-events: auto; transform: translateZ(0);">
+      <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+    </button>
 
-  <!-- Navigation button: slide 2 → 3 -->
-  <button id="btn-next" class="glass-btn" type="button" aria-label="Lanjut ke slide berikutnya" title="Lanjut" style="position: absolute; bottom: 30px; right: 25px;">
-    <!-- Arrow right icon -->
-    <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="5" y1="12" x2="19" y2="12"/>
-      <polyline points="12 5 19 12 12 19"/>
-    </svg>
-  </button>
+    <!-- Navigation button: slide 2 → 3 -->
+    <button id="btn-next" class="glass-btn" type="button" aria-label="Lanjut ke slide berikutnya" title="Lanjut" style="pointer-events: auto; transform: translateZ(0);">
+      <!-- Arrow right icon -->
+      <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -320,6 +322,6 @@
   </div>
 </div>
 
-<script src="script.js?v=37"></script>
+<script src="script.js?v=38"></script>
 </body>
 </html>
