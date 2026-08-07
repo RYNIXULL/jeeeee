@@ -1051,6 +1051,43 @@ body.no-scroll {
   visibility: hidden;
 }
 
+/* ─────────────────────────────────────────────
+   VIDEO LOADING BAR (fetch preloader)
+─────────────────────────────────────────────── */
+#video-loading-bar {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 80%;
+  max-width: 320px;
+  text-align: center;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.vload-text {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  letter-spacing: 0.05em;
+}
+
+.vload-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.vload-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #a78bfa, #ec4899);
+  border-radius: 4px;
+  transition: width 0.2s ease;
+}
 .chat-header {
   display: flex;
   justify-content: space-between;
