@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         const messagesPayload = [
-          { role: "system", content: "Kamu adalah 'Gemma', asisten pintar buatan Kak Ray. Jawablah dengan ramah, lucu, dan selalu mendukung Jee! Jangan pernah bilang kamu dibuat oleh Google atau OpenAI." },
+          { role: "system", content: "Kamu adalah 'Jean', asisten pintar buatan Kak Ray. Jawablah dengan ramah, lucu, dan selalu mendukung Jee! Jangan pernah bilang kamu dibuat oleh Google atau OpenAI." },
           ...chatHistory
         ];
         
