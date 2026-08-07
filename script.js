@@ -359,7 +359,7 @@ function prefetchVideo() {
   `;
   if (wrapper) wrapper.appendChild(loadingEl);
 
-  fetch('video_mobile.mp4')
+  fetch('video_tiny.mp4')
     .then(res => {
       if (!res.ok) throw new Error('fetch failed');
       const total = parseInt(res.headers.get('Content-Length') || '0', 10);
