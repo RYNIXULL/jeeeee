@@ -525,7 +525,7 @@ function initButtons() {
 // ─────────────────────────────────────────────
 function lockPage() {
   document.body.classList.add('no-scroll');
-  document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+  // Removed touchmove preventDefault to allow inner scrolling
   document.addEventListener('gesturestart', (e) => e.preventDefault());
   document.addEventListener('gesturechange', (e) => e.preventDefault());
 }
