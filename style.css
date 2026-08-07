@@ -1206,3 +1206,11 @@ body.no-scroll {
 @keyframes blink {
   50% { opacity: 0; }
 }
+
+@media (max-width: 768px) {
+  .glass-panel, .glass-card, .btn-back, .btn-next, #bot-chat-panel, .nav-dots, .poem-card {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+}
+

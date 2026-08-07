@@ -138,7 +138,7 @@ const Slider = (() => {
 
     // Slide 2: autoplay video
     if (index === 1) {
-      setTimeout(() => triggerVideoPlay(), 600);
+      triggerVideoPlay();
     } else {
       pauseVideo();
     }
