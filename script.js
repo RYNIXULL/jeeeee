@@ -414,18 +414,6 @@ function initEnvelope() {
     scene.setAttribute('aria-label', 'Klik untuk membuka amplop');
   }
 
-  // Scroll sound with throttling
-  const letterCard = document.querySelector('.letter-card');
-  let isScrolling = false;
-  if (letterCard) {
-    letterCard.addEventListener('scroll', () => {
-      if (!isScrolling) {
-        playPaperSound();
-        isScrolling = true;
-        setTimeout(() => { isScrolling = false; }, 350); // Throttle 350ms
-      }
-    }, { passive: true });
-  }
 
   scene.addEventListener('click', (e) => {
     addRipple(scene, e);
