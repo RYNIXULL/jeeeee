@@ -338,12 +338,13 @@ function typePoem() {
 }
 
 // ─────────────────────────────────────────────
-//  VIDEO (YouTube iframe integration)
+//  VIDEO (Dual integration: Native Desktop + YouTube Mobile)
 // ─────────────────────────────────────────────
-const videoEl = document.getElementById('main-video');
 
 function triggerVideoPlay() {
-  if (!videoEl || videoEl.tagName.toLowerCase() !== 'iframe') return;
+  const isMobile = window.innerWidth <= 768;
+  const desktopVideo = document.getElementById('main-video-desktop');
+  const mobileVideo = document.getElementById('main-video-mobile');
 
   // ── Freeze everything to free GPU for video ──
   const starfield = document.getElementById('starfield');
@@ -356,22 +357,39 @@ function triggerVideoPlay() {
     slidesContainer.style.transform = 'none';
   }
 
-  // Play YouTube via postMessage API
-  try {
-    videoEl.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
-  } catch (e) {
-    console.error('Cannot play YouTube iframe:', e);
+  if (isMobile) {
+    if (mobileVideo) {
+      try {
+        mobileVideo.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+      } catch (e) {
+        console.error('Cannot play YouTube iframe:', e);
+      }
+    }
+  } else {
+    if (desktopVideo) {
+      const play = desktopVideo.play();
+      if (play !== undefined) play.catch(() => Toast.show('Ketuk video untuk memutar', 'info', 4000));
+    }
   }
 }
 
 function pauseVideo() {
-  if (!videoEl || videoEl.tagName.toLowerCase() !== 'iframe') return;
+  const isMobile = window.innerWidth <= 768;
+  const desktopVideo = document.getElementById('main-video-desktop');
+  const mobileVideo = document.getElementById('main-video-mobile');
   
-  // Pause YouTube via postMessage API
-  try {
-    videoEl.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
-  } catch (e) {
-    console.error('Cannot pause YouTube iframe:', e);
+  if (isMobile) {
+    if (mobileVideo) {
+      try {
+        mobileVideo.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+      } catch (e) {
+        console.error('Cannot pause YouTube iframe:', e);
+      }
+    }
+  } else {
+    if (desktopVideo) {
+      desktopVideo.pause();
+    }
   }
 
   // ── Restore everything when video exits ──
