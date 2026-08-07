@@ -355,8 +355,7 @@ body.video-active #video-nav-overlay {
   #video-nav-overlay #btn-prev-1 { left: 20px; }
   #video-nav-overlay #btn-next   { right: 20px; }
 }
-
-.desktop-only-video {
+.global-video {
   display: block;
   width: 100%;
   height: 100%;
@@ -365,26 +364,6 @@ body.video-active #video-nav-overlay {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
-
-.mobile-only-video {
-  display: none;
-  width: 100%;
-  height: 100%;
-  border: none;
-  background: #000;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-}
-
-@media (max-width: 768px) {
-  .desktop-only-video {
-    display: none;
-  }
-  .mobile-only-video {
-    display: block;
-  }
-}
-
 /* Navigation buttons */
 #btn-next, .btn-next, .btn-back {
   position: absolute;

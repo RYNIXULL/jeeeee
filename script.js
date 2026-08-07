@@ -347,13 +347,11 @@ function typePoem() {
 }
 
 // ─────────────────────────────────────────────
-//  VIDEO (Dual integration: Native Desktop + YouTube Mobile)
+//  VIDEO (Native MP4 for all devices)
 // ─────────────────────────────────────────────
 
 function triggerVideoPlay() {
-  const isMobile = window.innerWidth <= 768;
-  const desktopVideo = document.getElementById('main-video-desktop');
-  const mobileVideo = document.getElementById('main-video-mobile');
+  const video = document.getElementById('main-video');
 
   // ── Freeze everything to free GPU for video ──
   const starfield = document.getElementById('starfield');
@@ -366,39 +364,17 @@ function triggerVideoPlay() {
     slidesContainer.style.transform = 'none';
   }
 
-  if (isMobile) {
-    if (mobileVideo) {
-      try {
-        mobileVideo.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
-      } catch (e) {
-        console.error('Cannot play YouTube iframe:', e);
-      }
-    }
-  } else {
-    if (desktopVideo) {
-      const play = desktopVideo.play();
-      if (play !== undefined) play.catch(() => Toast.show('Ketuk video untuk memutar', 'info', 4000));
-    }
+  if (video) {
+    const play = video.play();
+    if (play !== undefined) play.catch(() => Toast.show('Ketuk video untuk memutar', 'info', 4000));
   }
 }
 
 function pauseVideo() {
-  const isMobile = window.innerWidth <= 768;
-  const desktopVideo = document.getElementById('main-video-desktop');
-  const mobileVideo = document.getElementById('main-video-mobile');
+  const video = document.getElementById('main-video');
   
-  if (isMobile) {
-    if (mobileVideo) {
-      try {
-        mobileVideo.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
-      } catch (e) {
-        console.error('Cannot pause YouTube iframe:', e);
-      }
-    }
-  } else {
-    if (desktopVideo) {
-      desktopVideo.pause();
-    }
+  if (video) {
+    video.pause();
   }
 
   // ── Restore everything when video exits ──
