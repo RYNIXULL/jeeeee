@@ -324,14 +324,11 @@ const videoEl = document.getElementById('main-video');
 
 function triggerVideoPlay() {
   if (!videoEl) return;
-  videoEl.muted = false;
   const play = videoEl.play();
   if (play !== undefined) {
     play.catch(() => {
-      // Autoplay with sound blocked; try muted then show toast
-      videoEl.muted = true;
-      videoEl.play().catch(() => {});
-      Toast.show('Aktifkan suara pada perangkat Anda', 'info', 4000);
+      // If it still fails, user can use the native controls to play
+      Toast.show('Ketuk video untuk memutar', 'info', 4000);
     });
   }
 }
