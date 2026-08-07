@@ -1224,20 +1224,31 @@ body.no-scroll {
 }
 
 @media (max-width: 768px) {
-  .glass-panel, .glass-card, .btn-back, .btn-next, #bot-chat-panel, .nav-dots, .poem-card {
+  /* 1 & 2 & 8: Kill backdrop-filter, morphing animations, and heavy box shadows globally on glass elements */
+  .glass-panel, .glass-card, .btn-back, .btn-next, #bot-chat-panel, .nav-dots, .poem-card, .toast, .glass-btn, .chat-panel {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: rgba(15, 20, 30, 0.85) !important;
     animation: none !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important;
   }
   
-  .glass-btn {
-    animation: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(30, 40, 50, 0.9) !important;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+  /* 9. Simplify envelope drop-shadows on mobile */
+  .envelope-scene {
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)) !important;
+  }
+  .envelope-flap-top {
+    filter: none !important;
+  }
+}
+
+/* 10. Prefers-reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

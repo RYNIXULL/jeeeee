@@ -54,7 +54,7 @@ function buildStarfield() {
   const H = window.innerHeight;
 
   // Performance: fewer stars on small screens
-  const total = W < 768 ? Math.min(Math.floor((W * H) / 5000), 50) : Math.min(Math.floor((W * H) / 3000), 380);
+  const total = W < 768 ? Math.min(Math.floor((W * H) / 5000), 15) : Math.min(Math.floor((W * H) / 3000), 380);
   const fragment = document.createDocumentFragment();
 
   const types = ['twinkle-slow', 'twinkle-fast', 'drift', 'blink'];
@@ -260,14 +260,18 @@ function typePoem() {
 
   function typeTitle() {
     if (titleIndex < titleText.length) {
-      const char = titleText[titleIndex];
-      const textNode = document.createTextNode(char);
+      const isMobile = window.innerWidth < 768;
+      const charsToType = isMobile ? Math.min(2, titleText.length - titleIndex) : 1;
+      
+      const chunk = titleText.substring(titleIndex, titleIndex + charsToType);
+      const textNode = document.createTextNode(chunk);
       titleEl.insertBefore(textNode, cursor);
-      if (char !== ' ') playTypingSound();
-      titleIndex++;
+      
+      if (chunk.trim() !== '') playTypingSound();
+      titleIndex += charsToType;
       
       let delay = 135; // Slower base speed for title
-      if (char === ' ') delay = 280; // Pause on space
+      if (chunk.endsWith(' ')) delay = 280; // Pause on space
       
       setTimeout(typeTitle, delay);
     } else {
@@ -303,15 +307,24 @@ function typePoem() {
     }
     
     if (charIndex < currentLine.length) {
-      const char = currentLine[charIndex];
-      const txt = document.createTextNode(char);
+      const isMobile = window.innerWidth < 768;
+      // Batch up to 3 chars at a time on mobile to reduce DOM thrashing
+      const charsToType = isMobile ? Math.min(3, currentLine.length - charIndex) : 1;
+      
+      const chunk = currentLine.substring(charIndex, charIndex + charsToType);
+      const txt = document.createTextNode(chunk);
       currentP.insertBefore(txt, cursor);
-      if (char !== ' ') playTypingSound();
-      charIndex++;
+      
+      // Limit sound frequency on mobile
+      if (chunk.trim() !== '' && (!isMobile || charIndex % 2 === 0)) {
+        playTypingSound();
+      }
+      
+      charIndex += charsToType;
       
       let delay = 115; // Base speed for body
-      if (char === ' ') delay = 250; // Pause on space
-      if (char === ',' || char === '.') delay = 450; // Longer pause on punctuation
+      if (chunk.endsWith(' ')) delay = 250; // Pause on space
+      if (chunk.endsWith(',') || chunk.endsWith('.')) delay = 450; // Longer pause on punctuation
       
       setTimeout(typeContent, delay);
     } else {
@@ -445,27 +458,35 @@ let typingAudioBuffer = null;
 let typingGainNode = null;
 const clickCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// Preload audio manually for zero-latency playback
-fetch('photos-click-409642.mp3')
-  .then(res => res.arrayBuffer())
-  .then(data => clickCtx.decodeAudioData(data))
-  .then(buffer => {
-    clickAudioBuffer = buffer;
-  })
-  .catch(err => console.log('Error loading click sound', err));
+let audioInitialized = false;
 
-fetch('ncprime-keyboard-typing-one-short-292592.mp3')
-  .then(res => res.arrayBuffer())
-  .then(data => clickCtx.decodeAudioData(data))
-  .then(buffer => {
-    typingAudioBuffer = buffer;
-    typingGainNode = clickCtx.createGain();
-    typingGainNode.gain.value = 0.15; // Lower volume for typing
-    typingGainNode.connect(clickCtx.destination);
-  })
-  .catch(err => console.log('Error loading typing sound', err));
+function initAudio() {
+  if (audioInitialized) return;
+  audioInitialized = true;
+  if (clickCtx.state === 'suspended') clickCtx.resume();
+  
+  fetch('photos-click-409642.mp3')
+    .then(res => res.arrayBuffer())
+    .then(data => clickCtx.decodeAudioData(data))
+    .then(buffer => {
+      clickAudioBuffer = buffer;
+    })
+    .catch(err => console.log('Error loading click sound', err));
+
+  fetch('ncprime-keyboard-typing-one-short-292592.mp3')
+    .then(res => res.arrayBuffer())
+    .then(data => clickCtx.decodeAudioData(data))
+    .then(buffer => {
+      typingAudioBuffer = buffer;
+      typingGainNode = clickCtx.createGain();
+      typingGainNode.gain.value = 0.15; // Lower volume for typing
+      typingGainNode.connect(clickCtx.destination);
+    })
+    .catch(err => console.log('Error loading typing sound', err));
+}
 
 function playClickSound() {
+  if (!audioInitialized) initAudio();
   if (clickAudioBuffer) {
     if (clickCtx.state === 'suspended') clickCtx.resume();
     const source = clickCtx.createBufferSource();
