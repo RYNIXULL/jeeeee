@@ -350,6 +350,10 @@ body.video-active #video-nav-overlay {
     bottom: 24px;
     width: 48px;
     height: 48px;
+    animation: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
   #video-nav-overlay #btn-prev-1 { left: 20px; }
   #video-nav-overlay #btn-next   { right: 20px; }
