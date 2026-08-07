@@ -314,6 +314,47 @@ body.video-active .video-wrapper {
   visibility: visible;
 }
 
+/* ── Video nav overlay: OUTSIDE the iframe DOM tree ──────────
+   position:fixed + very high z-index ensures these buttons are
+   rendered by the browser's own compositor, completely above
+   the iframe's sandboxed touch surface on iOS/Android.       */
+#video-nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 800ms ease;
+}
+
+body.video-active #video-nav-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+#video-nav-overlay #btn-prev-1,
+#video-nav-overlay #btn-next {
+  position: absolute;
+  bottom: 36px;
+  pointer-events: auto;
+  will-change: auto;
+}
+
+#video-nav-overlay #btn-prev-1 { left: 36px; }
+#video-nav-overlay #btn-next   { right: 36px; }
+
+@media (max-width: 768px) {
+  #video-nav-overlay #btn-prev-1,
+  #video-nav-overlay #btn-next {
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+  }
+  #video-nav-overlay #btn-prev-1 { left: 20px; }
+  #video-nav-overlay #btn-next   { right: 20px; }
+}
+
 .video-wrapper video {
   display: block;
   width: 100%;
