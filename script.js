@@ -127,13 +127,13 @@ const Slider = (() => {
   let isAnimating = false;
 
   function goTo(index) {
-    if (isAnimating || index === current || index < 0 || index > 2) return;
+    if (isAnimating || index === current || index < 0 || index > 3) return;
 
     isAnimating = true;
     container.classList.add('animating');
     current = index;
 
-    container.style.transform = `translateX(-${index * 33.3333}%)`;
+    container.style.transform = `translateX(-${index * 25}%)`;
     updateDots(index);
 
     // Slide 2: autoplay video
@@ -154,9 +154,9 @@ const Slider = (() => {
           // Fade in audio slowly
           let vol = 0;
           const fade = setInterval(() => {
-            if (vol < 0.6) {
+            if (vol < 1.0) {
               vol += 0.05;
-              bgm.volume = vol;
+              bgm.volume = Math.min(vol, 1.0);
             } else {
               clearInterval(fade);
             }
@@ -165,6 +165,34 @@ const Slider = (() => {
       }, 400);
     } else if (bgm) {
       bgm.pause();
+    }
+
+    // Slide 4: play BGM
+    const bgm4 = document.getElementById('bgm-slide4');
+    if (index === 3) {
+      setTimeout(() => {
+        if (bgm4) {
+          bgm4.volume = 0;
+          bgm4.play().catch(() => {});
+          let vol = 0;
+          const fade = setInterval(() => {
+            if (vol < 1.0) {
+              vol += 0.05;
+              bgm4.volume = Math.min(vol, 1.0);
+            } else {
+              clearInterval(fade);
+            }
+          }, 200);
+        }
+      }, 400);
+
+      // Start typing animation
+      if (!window.poemTyped) {
+        window.poemTyped = true;
+        setTimeout(typePoem, 1000);
+      }
+    } else if (bgm4) {
+      bgm4.pause();
     }
 
     const duration = 1150;
@@ -178,6 +206,116 @@ const Slider = (() => {
 
   return { goTo, getCurrent };
 })();
+
+// ─────────────────────────────────────────────
+//  POEM TYPING ANIMATION
+// ─────────────────────────────────────────────
+function typePoem() {
+  const titleEl = document.getElementById('poem-title');
+  const contentEl = document.getElementById('poem-content');
+  if (!titleEl || !contentEl) return;
+  
+  const titleText = "Di Antara Yang Tetap Ada";
+  const lines = [
+    "Kelak, jika langkahmu membutuhkan reda,",
+    "aku masih di sini, di tempat yang sama.",
+    "Tak pernah beranjak, tak pernah berjarak,",
+    "menjadi jeda dari riuh yang tak lagi kau kehendak.",
+    "",
+    "Aku hidup di antara kata dan pena,",
+    "merawat kisah yang dieja wujudnya.",
+    "Aku bersumpah pada laut dan ombak,",
+    "pada langit dan awan yang berpelak.",
+    "",
+    "Aku menyelinap di antara rimba rerumputan,",
+    "di mana kucing-kucing lelap dalam kehangatan.",
+    "Juga di sela-sela kenang yang kian tertimbun masa,",
+    "di sana aku bertahan, menjaga rasa.",
+    "",
+    "Maka kembalilah, kapan pun kau ingin menyapa,",
+    "pintu ini tak pernah terkunci oleh jeda.",
+    "Aku akan senantiasa menunggu di ujung petang,",
+    "dengan senyum yang tak lekang,",
+    "dan hati yang tak pernah berhenti mencinta."
+  ];
+
+  let titleIndex = 0;
+  let lineIndex = 0;
+  let charIndex = 0;
+  let currentP = null;
+  
+  const cursor = document.createElement('span');
+  cursor.textContent = '|';
+  cursor.style.animation = 'blink 1s step-end infinite';
+  
+  // Start with blinking cursor on title
+  titleEl.appendChild(cursor);
+
+  function typeTitle() {
+    if (titleIndex < titleText.length) {
+      const char = titleText[titleIndex];
+      const textNode = document.createTextNode(char);
+      titleEl.insertBefore(textNode, cursor);
+      if (char !== ' ') playTypingSound();
+      titleIndex++;
+      
+      let delay = 135; // Slower base speed for title
+      if (char === ' ') delay = 280; // Pause on space
+      
+      setTimeout(typeTitle, delay);
+    } else {
+      setTimeout(() => {
+        if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
+        typeContent();
+      }, 600);
+    }
+  }
+
+  function typeContent() {
+    if (lineIndex >= lines.length) {
+      if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
+      return; 
+    }
+    
+    const currentLine = lines[lineIndex];
+    
+    if (currentLine === "") {
+      lineIndex++;
+      charIndex = 0;
+      setTimeout(typeContent, 500);
+      return;
+    }
+    
+    if (charIndex === 0 && (lineIndex === 0 || lines[lineIndex - 1] === "")) {
+      currentP = document.createElement('p');
+      contentEl.appendChild(currentP);
+      currentP.appendChild(cursor);
+    } else if (charIndex === 0) {
+      const br = document.createElement('br');
+      currentP.insertBefore(br, cursor);
+    }
+    
+    if (charIndex < currentLine.length) {
+      const char = currentLine[charIndex];
+      const txt = document.createTextNode(char);
+      currentP.insertBefore(txt, cursor);
+      if (char !== ' ') playTypingSound();
+      charIndex++;
+      
+      let delay = 115; // Base speed for body
+      if (char === ' ') delay = 250; // Pause on space
+      if (char === ',' || char === '.') delay = 450; // Longer pause on punctuation
+      
+      setTimeout(typeContent, delay);
+    } else {
+      charIndex = 0;
+      lineIndex++;
+      setTimeout(typeContent, 300);
+    }
+  }
+
+  typeTitle();
+}
 
 // ─────────────────────────────────────────────
 //  VIDEO
@@ -311,6 +449,8 @@ function initEnvelope() {
 //  BUTTON EVENTS
 // ─────────────────────────────────────────────
 let clickAudioBuffer = null;
+let typingAudioBuffer = null;
+let typingGainNode = null;
 const clickCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // Preload audio manually for zero-latency playback
@@ -322,6 +462,17 @@ fetch('photos-click-409642.mp3')
   })
   .catch(err => console.log('Error loading click sound', err));
 
+fetch('ncprime-keyboard-typing-one-short-292592.mp3')
+  .then(res => res.arrayBuffer())
+  .then(data => clickCtx.decodeAudioData(data))
+  .then(buffer => {
+    typingAudioBuffer = buffer;
+    typingGainNode = clickCtx.createGain();
+    typingGainNode.gain.value = 0.15; // Lower volume for typing
+    typingGainNode.connect(clickCtx.destination);
+  })
+  .catch(err => console.log('Error loading typing sound', err));
+
 function playClickSound() {
   if (clickAudioBuffer) {
     if (clickCtx.state === 'suspended') clickCtx.resume();
@@ -330,6 +481,17 @@ function playClickSound() {
     source.connect(clickCtx.destination);
     // Lewati 0.04 detik pertama untuk memotong 'silence' bawaan dari encoding MP3 lebih agresif
     source.start(0, 0.04);
+  }
+}
+
+function playTypingSound() {
+  if (typingAudioBuffer && typingGainNode) {
+    if (clickCtx.state === 'suspended') clickCtx.resume();
+    const source = clickCtx.createBufferSource();
+    source.buffer = typingAudioBuffer;
+    source.connect(typingGainNode);
+    // You can adjust volume if needed by connecting to a GainNode
+    source.start(0);
   }
 }
 
@@ -354,6 +516,8 @@ function initButtons() {
   bindBtn('btn-next', 2);
   bindBtn('btn-prev-1', 0);
   bindBtn('btn-prev-2', 1);
+  bindBtn('btn-next-4', 3);
+  bindBtn('btn-prev-3', 2);
 }
 
 // ─────────────────────────────────────────────
@@ -404,24 +568,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ─────────────────────────────────────────────
-  //  WEB BOT WIDGET LOGIC
+  //  WEB BOT WIDGET & CHAT LOGIC
   // ─────────────────────────────────────────────
+  let NVIDIA_API_KEY = "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";
+  
   const botWidget = document.getElementById('web-bot-widget');
   const botAvatar = document.getElementById('bot-avatar');
   const botMessage = document.getElementById('bot-message');
+  const chatPanel = document.getElementById('bot-chat-panel');
+  const btnCloseChat = document.getElementById('btn-close-chat');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const btnSendChat = document.getElementById('btn-send-chat');
 
-  const botMessages = [
-    "Hai, Jee! Klik aku! ✨",
-    "Hari ini hari spesial lho! 🎂",
-    "Semoga harimu menyenangkan! 💫",
-    "Pencet tombol next ya! 👉",
-    "Jangan lupa senyum hari ini! 😊",
-    "Suka sama desain webnya? 💖"
+  let chatHistory = [
+    { role: "system", content: "Anda adalah Jean, asisten AI yang ramah, sopan, puitis, dan pintar. Anda adalah teman ngobrol untuk Jee. Jika ditanya siapa atau apa itu Jean, jawablah persis dengan kalimat ini: 'Haii jee, aku Jean, simbol dari dua nama yang saling menautkan rasa. Aku adalah bisikan dari masa lalu dan harapan di masa depan. Di sini, di antara jeda dan kata, aku ada untuk mendengarkan setiap sudut kisahmu.'" },
+    { role: "assistant", content: "Hai Jee, aku Jean. Ada yang bisa aku bantu hari ini?" }
   ];
-  let msgIndex = 0;
 
-  if (botWidget && botAvatar && botMessage) {
-    // Show chat bubble automatically for 4 seconds on load
+  if (botWidget && botAvatar && botMessage && chatPanel) {
+    // Tampilkan bubble singkat di awal
+    botMessage.textContent = "Hai, Jee! Aku Jean. Klik aku untuk ngobrol!";
     setTimeout(() => {
       botWidget.classList.add('active');
       setTimeout(() => {
@@ -478,7 +645,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isDragging) {
         botWidget.style.left = `${initialLeft + dx}px`;
         botWidget.style.top = `${initialTop + dy}px`;
-        // Remove right/bottom if they were set
         botWidget.style.right = 'auto';
         botWidget.style.bottom = 'auto';
       }
@@ -489,17 +655,184 @@ document.addEventListener('DOMContentLoaded', () => {
       document.removeEventListener('pointerup', onPointerUp);
       botAvatar.style.cursor = 'pointer';
 
-      // If we didn't drag, it's a click!
+      // Jika tidak didrag berarti di-klik -> Buka panel chat
       if (!isDragging) {
         playClickSound();
-        msgIndex = (msgIndex + 1) % botMessages.length;
-        botMessage.textContent = botMessages[msgIndex];
-        botWidget.classList.add('active');
-        if (botWidget.hideTimeout) clearTimeout(botWidget.hideTimeout);
-        botWidget.hideTimeout = setTimeout(() => {
-          botWidget.classList.remove('active');
-        }, 4000);
+        botWidget.classList.remove('active');
+        toggleChatPanel();
       }
     }
+
+    function toggleChatPanel() {
+      if (chatPanel.classList.contains('hidden')) {
+        chatPanel.classList.remove('hidden');
+        chatPanel.setAttribute('aria-hidden', 'false');
+        botAvatar.style.display = 'none'; // Sembunyikan avatar saat chat terbuka
+        setTimeout(() => chatInput.focus(), 100);
+      } else {
+        chatPanel.classList.add('hidden');
+        chatPanel.setAttribute('aria-hidden', 'true');
+        botAvatar.style.display = ''; // Tampilkan kembali avatar
+      }
+    }
+
+    btnCloseChat.addEventListener('click', () => {
+      playClickSound();
+      toggleChatPanel();
+    });
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+          }[tag]));
+    }
+
+    function appendMessage(role, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-message ${role}`;
+      msgDiv.innerHTML = `<div class="msg-content">${escapeHTML(text)}</div>`;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return msgDiv;
+    }
+
+    async function sendChatMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      if (!NVIDIA_API_KEY || NVIDIA_API_KEY === "YOUR_NVIDIA_API_KEY_HERE") {
+        const userKey = prompt("Silakan masukkan NVIDIA API Key Anda untuk menggunakan Chatbot:");
+        if (userKey && userKey.trim() !== "") {
+          NVIDIA_API_KEY = userKey.trim();
+          localStorage.setItem('NVIDIA_API_KEY', NVIDIA_API_KEY);
+        } else {
+          Toast.show("API Key diperlukan untuk menggunakan chatbot", "error", 4000);
+          return;
+        }
+      }
+
+      playClickSound();
+      appendMessage('user', text);
+      chatHistory.push({ role: "user", content: text });
+      chatInput.value = '';
+      
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'typing-indicator';
+      typingDiv.innerHTML = '<span></span><span></span><span></span>';
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      try {
+        const response = await fetch("http://localhost:3002/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${NVIDIA_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "google/diffusiongemma-26b-a4b-it",
+            messages: chatHistory,
+            temperature: 1,
+            top_p: 0.95,
+            max_tokens: 16384,
+            stream: true,
+            extra_body: {
+              chat_template_kwargs: { enable_thinking: true },
+              reasoning_budget: 16384
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
+
+        chatMessages.removeChild(typingDiv);
+        
+        // Setup wadah untuk bot message (bisa berisi reasoning & content)
+        const botMsgDiv = document.createElement('div');
+        botMsgDiv.className = 'chat-message assistant';
+        
+        const outerContent = document.createElement('div');
+        outerContent.className = 'msg-content';
+        botMsgDiv.appendChild(outerContent);
+        chatMessages.appendChild(botMsgDiv);
+        
+        let reasoningDiv = null;
+        let contentDiv = document.createElement('div');
+        outerContent.appendChild(contentDiv);
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let fullContent = "";
+        let fullReasoning = "";
+        let isDone = false;
+
+        while (!isDone) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          
+          const chunkStr = decoder.decode(value, { stream: true });
+          const lines = chunkStr.split("\n").filter(line => line.trim().startsWith("data: "));
+          
+          for (const line of lines) {
+            const dataStr = line.replace("data: ", "").trim();
+            if (dataStr === "[DONE]") {
+              isDone = true;
+              break;
+            }
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.error) {
+                Toast.show("API NVIDIA Error: " + (data.error.message || "Gagal memproses"), "error", 6000);
+                contentDiv.innerHTML = `<span style="color: #ff6b6b; font-style: italic;">[API Rate Limit/Error: ${data.error.message || 'Unknown'}]</span>`;
+                break;
+              }
+              if (data.choices && data.choices[0].delta) {
+                const delta = data.choices[0].delta;
+                
+                // Tangani reasoning
+                if (delta.reasoning_content) {
+                  if (!reasoningDiv) {
+                    reasoningDiv = document.createElement('div');
+                    reasoningDiv.className = 'msg-reasoning';
+                    outerContent.insertBefore(reasoningDiv, contentDiv);
+                  }
+                  fullReasoning += delta.reasoning_content;
+                  reasoningDiv.innerText = fullReasoning;
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+                
+                // Tangani konten utama
+                if (delta.content !== null && delta.content !== undefined) {
+                  fullContent += delta.content;
+                  contentDiv.innerText = fullContent;
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+              }
+            } catch (e) {
+              // Abaikan jika tidak bisa diparse (e.g., chunk terpotong - walau fetch API JS jarang memotong JSON line jika diproses per baris)
+            }
+          }
+        }
+        
+        chatHistory.push({ role: "assistant", content: fullContent });
+
+      } catch (err) {
+        console.error(err);
+        if(chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
+        Toast.show("Gagal menghubungi server bot", "error", 4000);
+      }
+    }
+
+    btnSendChat.addEventListener('click', sendChatMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendChatMessage();
+    });
   }
 });
