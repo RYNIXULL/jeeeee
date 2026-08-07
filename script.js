@@ -54,7 +54,7 @@ function buildStarfield() {
   const H = window.innerHeight;
 
   // Performance: fewer stars on small screens
-  const total = Math.min(Math.floor((W * H) / 3000), 380);
+  const total = W < 768 ? Math.min(Math.floor((W * H) / 5000), 50) : Math.min(Math.floor((W * H) / 3000), 380);
   const fragment = document.createDocumentFragment();
 
   const types = ['twinkle-slow', 'twinkle-fast', 'drift', 'blink'];

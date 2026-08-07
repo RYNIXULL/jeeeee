@@ -200,24 +200,14 @@
         <div class="env-seal" aria-hidden="true">
           <svg class="wax-seal-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <filter id="realistic-wax" x="-20%" y="-20%" width="140%" height="140%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" result="noise" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="displaced" />
-                <feGaussianBlur in="displaced" stdDeviation="2" result="blur" />
-                <feSpecularLighting in="blur" surfaceScale="6" specularConstant="1.2" specularExponent="30" lighting-color="#ffd5d5" result="spec">
-                  <fePointLight x="10" y="10" z="40" />
-                </feSpecularLighting>
-                <feComposite in="spec" in2="displaced" operator="in" result="specMasked" />
-                <feComposite in="displaced" in2="specMasked" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="lit" />
-                <feDropShadow in="lit" dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.6" />
-              </filter>
+              <!-- Removed SVG filter for performance -->
               <radialGradient id="wax-grad" cx="35%" cy="35%" r="65%">
                 <stop offset="0%" stop-color="#e34040"/>
                 <stop offset="45%" stop-color="#a81313"/>
                 <stop offset="100%" stop-color="#6a0505"/>
               </radialGradient>
             </defs>
-            <circle cx="50" cy="50" r="36" fill="url(#wax-grad)" filter="url(#realistic-wax)" />
+            <circle cx="50" cy="50" r="36" fill="url(#wax-grad)" />
           </svg>
           <div class="seal-inner"></div>
           <span class="seal-letter">r</span>
@@ -340,6 +330,6 @@
   </div>
 </div>
 
-<script src="script.js?v=19"></script>
+<script src="script.js?v=21"></script>
 </body>
 </html>
