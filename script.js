@@ -771,6 +771,11 @@ document.addEventListener('DOMContentLoaded', () => {
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
       try {
+        const messagesPayload = [
+          { role: "system", content: "Kamu adalah 'Gemma', asisten pintar buatan Jee. Jawablah dengan ramah, lucu, dan selalu mendukung Jee! Jangan pernah bilang kamu dibuat oleh Google atau OpenAI." },
+          ...chatHistory
+        ];
+        
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: {
@@ -778,16 +783,12 @@ document.addEventListener('DOMContentLoaded', () => {
             "Authorization": `Bearer ${NVIDIA_API_KEY}`
           },
           body: JSON.stringify({
-            model: "google/diffusiongemma-26b-a4b-it",
-            messages: chatHistory,
-            temperature: 1,
+            model: "meta/llama-3.1-70b-instruct",
+            messages: messagesPayload,
+            temperature: 0.7,
             top_p: 0.95,
-            max_tokens: 16384,
-            stream: true,
-            extra_body: {
-              chat_template_kwargs: { enable_thinking: true },
-              reasoning_budget: 16384
-            }
+            max_tokens: 1024,
+            stream: true
           })
         });
 
