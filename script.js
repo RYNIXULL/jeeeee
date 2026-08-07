@@ -129,6 +129,11 @@ const Slider = (() => {
   function goTo(index) {
     if (isAnimating || index === current || index < 0 || index > 3) return;
 
+    const slides = document.querySelectorAll('.slide');
+    slides.forEach(s => {
+      s.style.visibility = 'visible';
+    });
+
     isAnimating = true;
     container.classList.add('animating');
     current = index;
