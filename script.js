@@ -381,8 +381,7 @@ function pauseVideo() {
   const slidesContainer = document.getElementById('slides-container');
   if (slidesContainer) {
     slidesContainer.style.willChange = 'transform';
-    // Re-apply correct slide position (slide-2 = index 1 = -25%)
-    slidesContainer.style.transform = 'translateX(-25%)';
+    // Don't set transform here — goTo() already sets the correct destination
   }
 }
 
