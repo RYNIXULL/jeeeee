@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="A cinematic, romantic night sky experience">
   <title>jee</title>
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -13,6 +13,22 @@
      STARFIELD (full-page fixed background)
 ════════════════════════════════════════════ -->
 <div id="starfield" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════════════════════
+     GLOBAL VIDEO CONTAINER (FIXED IOS LAG)
+════════════════════════════════════════════ -->
+<div class="video-wrapper" id="global-video-wrapper">
+  <video
+    id="main-video"
+    playsinline
+    controls
+    preload="metadata"
+    aria-label="Video spesial untuk jee"
+  >
+    <source src="do%20you%20think%20i%20forgot%20you.mp4" type="video/mp4">
+    Peramban Anda tidak mendukung video HTML5.
+  </video>
+</div>
 
 <!-- ═══════════════════════════════════════════
      PROGRESS DOTS
@@ -58,20 +74,6 @@
          SLIDE 2 — VIDEO
     ──────────────────────────────────────── -->
     <section class="slide" id="slide-2" aria-label="Slide video">
-
-      <div class="video-wrapper">
-        <video
-          id="main-video"
-          playsinline
-          controls
-          preload="metadata"
-          aria-label="Video spesial untuk jee"
-        >
-          <source src="do%20you%20think%20i%20forgot%20you.mp4" type="video/mp4">
-          Peramban Anda tidak mendukung video HTML5.
-        </video>
-      </div>
-
       <!-- Navigation button: back to slide 1 -->
       <button
         id="btn-prev-1"
@@ -331,6 +333,6 @@
   </div>
 </div>
 
-<script src="script.js?v=28"></script>
+<script src="script.js?v=29"></script>
 </body>
 </html>
