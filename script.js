@@ -338,65 +338,12 @@ function typePoem() {
 }
 
 // ─────────────────────────────────────────────
-//  VIDEO
+//  VIDEO (YouTube iframe integration)
 // ─────────────────────────────────────────────
 const videoEl = document.getElementById('main-video');
-let videoBlobUrl = null;
-let videoFetchStarted = false;
-
-// Bypass mobile preload restrictions using fetch() + Blob URL
-// Mobile browsers ignore preload="auto" on cellular — fetch() forces it
-function prefetchVideo() {
-  if (videoFetchStarted || videoBlobUrl) return;
-  videoFetchStarted = true;
-
-  const wrapper = document.getElementById('global-video-wrapper');
-  const loadingEl = document.createElement('div');
-  loadingEl.id = 'video-loading-bar';
-  loadingEl.innerHTML = `
-    <div class="vload-text">Memuat video...</div>
-    <div class="vload-track"><div class="vload-fill" id="vload-fill"></div></div>
-  `;
-  if (wrapper) wrapper.appendChild(loadingEl);
-
-  fetch('video_tiny.mp4')
-    .then(res => {
-      if (!res.ok) throw new Error('fetch failed');
-      const total = parseInt(res.headers.get('Content-Length') || '0', 10);
-      let loaded = 0;
-      const fillEl = document.getElementById('vload-fill');
-      const reader = res.body.getReader();
-      const chunks = [];
-
-      function read() {
-        return reader.read().then(({ done, value }) => {
-          if (done) {
-            const blob = new Blob(chunks, { type: 'video/mp4' });
-            videoBlobUrl = URL.createObjectURL(blob);
-            videoEl.src = videoBlobUrl;
-            videoEl.load();
-            loadingEl.remove();
-            return;
-          }
-          chunks.push(value);
-          loaded += value.length;
-          if (total && fillEl) {
-            fillEl.style.width = Math.min(100, (loaded / total) * 100) + '%';
-          }
-          return read();
-        });
-      }
-      return read();
-    })
-    .catch(() => {
-      // Fallback: let native video handle it
-      videoFetchStarted = false;
-      if (loadingEl.parentNode) loadingEl.remove();
-    });
-}
 
 function triggerVideoPlay() {
-  if (!videoEl) return;
+  if (!videoEl || videoEl.tagName.toLowerCase() !== 'iframe') return;
 
   // ── Freeze everything to free GPU for video ──
   const starfield = document.getElementById('starfield');
@@ -409,25 +356,23 @@ function triggerVideoPlay() {
     slidesContainer.style.transform = 'none';
   }
 
-  // Start prefetch when entering slide 2
-  prefetchVideo();
-  
-  // Play only if blob is ready; otherwise wait for canplay event
-  if (videoBlobUrl) {
-    const play = videoEl.play();
-    if (play !== undefined) play.catch(() => Toast.show('Ketuk video untuk memutar', 'info', 4000));
-  } else {
-    videoEl.addEventListener('canplaythrough', function onReady() {
-      videoEl.removeEventListener('canplaythrough', onReady);
-      const play = videoEl.play();
-      if (play !== undefined) play.catch(() => {});
-    }, { once: true });
+  // Play YouTube via postMessage API
+  try {
+    videoEl.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+  } catch (e) {
+    console.error('Cannot play YouTube iframe:', e);
   }
 }
 
 function pauseVideo() {
-  if (!videoEl) return;
-  videoEl.pause();
+  if (!videoEl || videoEl.tagName.toLowerCase() !== 'iframe') return;
+  
+  // Pause YouTube via postMessage API
+  try {
+    videoEl.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+  } catch (e) {
+    console.error('Cannot pause YouTube iframe:', e);
+  }
 
   // ── Restore everything when video exits ──
   const starfield = document.getElementById('starfield');
